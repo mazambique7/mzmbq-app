@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>MZMBQ VPN</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: #0a0c10;
+    color: #fff;
+    padding-bottom: 70px;
+  }
+
+  .container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px 16px;
+  }
+
+  .welcome {
+    margin-bottom: 24px;
+  }
+  .welcome h1 {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .welcome p {
+    color: #8e8e93;
+    font-size: 14px;
+  }
+
+  .balance-card {
+    background: #1c1e24;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .balance-label {
+    font-size: 14px;
+    color: #8e8e93;
+  }
+  .balance-amount {
+    font-size: 32px;
+    font-weight: 700;
+  }
+  .balance-btn {
+    background: #2c6e9e;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .balance-btn:active { opacity: 0.7; }
+
+  .subscription-card {
+    background: #1c1e24;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .sub-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .sub-status-label {
+    font-size: 14px;
+    color: #8e8e93;
+  }
+  .sub-status-value {
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .sub-status-value.active { color: #34c759; }
+  .sub-status-value.inactive { color: #ff3b30; }
+
+  .sub-plan {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .sub-expires {
+    font-size: 13px;
+    color: #8e8e93;
+    margin-bottom: 16px;
+  }
+
+  .connect-btn {
+    width: 100%;
+    background: #2c6e9e;
+    padding: 16px;
+    border-radius: 14px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-top: 8px;
+  }
+  .connect-btn:active { opacity: 0.8; background: #1e5a85; }
+
+  .topup-card {
+    background: #1c1e24;
+    border-radius: 20px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    margin-bottom: 12px;
+  }
+  .topup-card:active { opacity: 0.7; }
+  .topup-text { font-weight: 500; }
+  .topup-note { font-size: 12px; color: #8e8e93; }
+  .topup-arrow { font-size: 20px; color: #8e8e93; }
+
+  .footer-links {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin: 20px 0;
+    font-size: 12px;
+    color: #8e8e93;
+  }
+  .footer-links span {
+    cursor: pointer;
+  }
+
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #0c0e12;
+    backdrop-filter: blur(20px);
+    border-top: 0.5px solid #2c2e36;
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 0 12px;
+    z-index: 100;
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    color: #8e8e93;
+    font-size: 12px;
+    transition: 0.2s;
+    padding: 6px 12px;
+    border-radius: 30px;
+  }
+  .nav-item.active {
+    color: #2c6e9e;
+    background: rgba(44,110,158,0.1);
+  }
+  .nav-icon { font-size: 22px; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .plans-list { margin-top: 16px; }
+  .plan-item {
+    background: #1c1e24;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+  .plan-item:active { opacity: 0.7; }
+  .plan-item-name { font-weight: 600; }
+  .plan-item-price { color: #2c6e9e; font-weight: 600; }
+  .plan-item-old-price { font-size: 12px; color: #8e8e93; text-decoration: line-through; margin-left: 8px; }
+
+  .amount-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .amount-btn {
+    background: #2c2e36;
+    padding: 14px;
+    text-align: center;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  .amount-btn:active { opacity: 0.7; }
+  .custom-amount {
+    background: #2c2e36;
+    border: none;
+    color: #fff;
+    padding: 14px;
+    border-radius: 14px;
+    width: 100%;
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .device-item {
+    background: #1c1e24;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .device-name { font-weight: 500; }
+  .device-status { font-size: 12px; color: #8e8e93; }
+
+  .referral-stats {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .stat-box {
+    background: #1c1e24;
+    border-radius: 14px;
+    padding: 16px;
+    flex: 1;
+    text-align: center;
+  }
+  .stat-number { font-size: 28px; font-weight: 700; color: #2c6e9e; }
+  .stat-label { font-size: 12px; color: #8e8e93; }
+
+  .toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #2c2e36;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 14px;
+    z-index: 300;
+    transition: 0.2s;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { background: #34c759; color: #fff; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ГЛАВНАЯ -->
+  <div id="page-home" class="page active">
+    <div class="welcome">
+      <h1>Привет, <span id="user-name">...</span></h1>
+      <p>Добро пожаловать в MZMBQ VPN</p>
+    </div>
+
+    <div class="balance-card">
+      <div>
+        <div class="balance-label">Баланс</div>
+        <div class="balance-amount">0 ₽</div>
+      </div>
+      <div class="balance-btn" onclick="showPage('topup')">Пополнить</div>
+    </div>
+
+    <div class="subscription-card">
+      <div class="sub-status">
+        <span class="sub-status-label">Подписка</span>
+        <span id="sub-status-value" class="sub-status-value inactive">● Неактивна</span>
+      </div>
+      <div id="sub-plan-info" class="sub-plan">—</div>
+      <div id="sub-expires-info" class="sub-expires">—</div>
+      <div class="connect-btn" id="connect-btn" onclick="copyKey()">Подключить VPN</div>
+    </div>
+
+    <div class="topup-card" onclick="showPage('topup')">
+      <div>
+        <div class="topup-text">Пополнить</div>
+        <div class="topup-note">Минимум 100 ₽</div>
+      </div>
+      <div class="topup-arrow">→</div>
+    </div>
+
+    <div class="topup-card" onclick="showPage('history')">
+      <div>
+        <div class="topup-text">История</div>
+        <div class="topup-note">Все транзакции</div>
+      </div>
+      <div class="topup-arrow">→</div>
+    </div>
+
+    <div class="topup-card" onclick="showPage('referral')">
+      <div>
+        <div class="topup-text">Рефералы</div>
+        <div class="topup-note"><span id="referral-count">0</span> приглашено</div>
+      </div>
+      <div class="topup-arrow">→</div>
+    </div>
+
+    <div class="topup-card" onclick="showPage('devices')">
+      <div>
+        <div class="topup-text">Активные устройства</div>
+        <div class="topup-note">Все →</div>
+      </div>
+      <div class="topup-arrow">→</div>
+    </div>
+
+    <div class="footer-links">
+      <span onclick="openDocs('offer')">Договор оферты</span>
+      <span onclick="openDocs('privacy')">Политика конфиденциальности</span>
+    </div>
+  </div>
+
+  <!-- ПОДПИСКА (ТАРИФЫ) -->
+  <div id="page-subscription" class="page">
+    <div class="welcome">
+      <h1>Подписка</h1>
+      <p>Выберите удобный тариф</p>
+    </div>
+    <div class="plans-list">
+      <div class="plan-item" onclick="buyPlan('1m')">
+        <div>
+          <div class="plan-item-name">1 месяц</div>
+          <div class="plan-item-price">100 ₽</div>
+        </div>
+      </div>
+      <div class="plan-item" onclick="buyPlan('3m')">
+        <div>
+          <div class="plan-item-name">3 месяца</div>
+          <div class="plan-item-price">250 ₽</div>
+          <div class="plan-item-old-price">300 ₽</div>
+        </div>
+        <div>🔥 -17%</div>
+      </div>
+      <div class="plan-item" onclick="buyPlan('1y')">
+        <div>
+          <div class="plan-item-name">1 год</div>
+          <div class="plan-item-price">1 000 ₽</div>
+          <div class="plan-item-old-price">1 200 ₽</div>
+        </div>
+        <div>🏆 -65%</div>
+      </div>
+    </div>
+    <div class="footer-links" style="margin-top: 20px;">
+      <span onclick="showPage('home')">← На главную</span>
+    </div>
+  </div>
+
+  <!-- ПОПОЛНЕНИЕ -->
+  <div id="page-topup" class="page">
+    <div class="welcome">
+      <h1>Пополнение баланса</h1>
+      <p>Выберите сумму</p>
+    </div>
+    <div class="amount-grid">
+      <div class="amount-btn" onclick="topupAmount(100)">100₽</div>
+      <div class="amount-btn" onclick="topupAmount(250)">250₽</div>
+      <div class="amount-btn" onclick="topupAmount(500)">500₽</div>
+      <div class="amount-btn" onclick="topupAmount(1000)">1000₽</div>
+      <div class="amount-btn" onclick="topupAmount(2000)">2000₽</div>
+      <div class="amount-btn" onclick="topupAmount(5000)">5000₽</div>
+    </div>
+    <input type="number" id="custom-amount" class="custom-amount" placeholder="Введите сумму" value="">
+    <div class="connect-btn" onclick="topupCustom()">Пополнить</div>
+    <div class="footer-links" style="margin-top: 20px;">
+      <span onclick="showPage('home')">← На главную</span>
+    </div>
+  </div>
+
+  <!-- ИСТОРИЯ -->
+  <div id="page-history" class="page">
+    <div class="welcome">
+      <h1>История</h1>
+      <p>Все транзакции</p>
+    </div>
+    <div id="history-list" style="margin-bottom: 20px;">
+      <div style="text-align: center; color: #8e8e93; padding: 40px;">Загрузка...</div>
+    </div>
+    <div class="footer-links">
+      <span onclick="showPage('home')">← На главную</span>
+    </div>
+  </div>
+
+  <!-- РЕФЕРАЛЫ -->
+  <div id="page-referral" class="page">
+    <div class="welcome">
+      <h1>Рефералы</h1>
+      <p>Приглашайте друзей и получайте бонусы</p>
+    </div>
+    <div class="referral-stats">
+      <div class="stat-box">
+        <div class="stat-number" id="referral-count-stat">0</div>
+        <div class="stat-label">Приглашено</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">+15</div>
+        <div class="stat-label">Дней бонус</div>
+      </div>
+    </div>
+    <div class="subscription-card" style="text-align: center;">
+      <div class="sub-plan" id="referral-link" style="font-size: 14px; word-break: break-all;">Загрузка...</div>
+      <div class="connect-btn" onclick="copyReferralLink()">Скопировать ссылку</div>
+      <div class="sub-expires" style="margin-top: 12px;">+15 дней за каждого друга, который купит подписку</div>
+    </div>
+    <div class="footer-links" style="margin-top: 20px;">
+      <span onclick="showPage('home')">← На главную</span>
+    </div>
+  </div>
+
+  <!-- ПОДДЕРЖКА -->
+  <div id="page-support" class="page">
+    <div class="welcome">
+      <h1>Поддержка</h1>
+      <p>Ответим в течение 15 минут</p>
+    </div>
+    <div class="topup-card" onclick="openTg('@mazambique7')">
+      <div>
+        <div class="topup-text">💬 Написать в поддержку</div>
+        <div class="topup-note">Telegram</div>
+      </div>
+      <div class="topup-arrow">→</div>
+    </div>
+    <div class="topup-card" onclick="openTg('@mzmbq_vpn')">
+      <div>
+        <div class="topup-text">📣 Telegram канал</div>
+        <div class="topup-note">Новости и обновления</div>
+      </div>
+      <div class="topup-arrow">→</div>
+    </div>
+    <div class="footer-links" style="margin-top: 20px;">
+      <span onclick="showPage('home')">← На главную</span>
+    </div>
+  </div>
+
+  <!-- АКТИВНЫЕ УСТРОЙСТВА -->
+  <div id="page-devices" class="page">
+    <div class="welcome">
+      <h1>Активные устройства</h1>
+      <p>Устройства, использующие ваш ключ</p>
+    </div>
+    <div id="devices-list">
+      <div class="device-item">
+        <div>
+          <div class="device-name">Текущее устройство</div>
+          <div class="device-status">Активно сейчас</div>
+        </div>
+        <div>🟢</div>
+      </div>
+    </div>
+    <div class="footer-links" style="margin-top: 20px;">
+      <span onclick="showPage('home')">← На главную</span>
+    </div>
+  </div>
+
+</div>
+
+<nav class="bottom-nav">
+  <div class="nav-item active" onclick="showPage('home', this)"><div class="nav-icon">🏠</div><div>Главная</div></div>
+  <div class="nav-item" onclick="showPage('subscription', this)"><div class="nav-icon">📦</div><div>Подписка</div></div>
+  <div class="nav-item" onclick="showPage('topup', this)"><div class="nav-icon">💰</div><div>Баланс</div></div>
+  <div class="nav-item" onclick="showPage('referral', this)"><div class="nav-icon">👥</div><div>Рефералы</div></div>
+  <div class="nav-item" onclick="showPage('support', this)"><div class="nav-icon">💬</div><div>Поддержка</div></div>
+</nav>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const tg = window.Telegram?.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.setHeaderColor('#0a0c10');
+  tg.setBackgroundColor('#0a0c10');
+}
+
+let userData = {
+  id: tg?.initDataUnsafe?.user?.id || null,
+  name: tg?.initDataUnsafe?.user?.first_name || 'Пользователь',
+  hasSubscription: false,
+  plan: '',
+  expiresAt: '',
+  daysLeft: 0,
+  subscriptionLink: ''
+};
+
+let referralCount = 0;
+
+// ========== API ВЫЗОВЫ ==========
+const API_BASE = 'https://194.154.24.135:36277';
+
+async function loadUserData() {
+  if (!userData.id) {
+    userData.name = 'Пользователь';
+    document.getElementById('user-name').textContent = userData.name;
+    return;
+  }
+  document.getElementById('user-name').textContent = userData.name;
+  
+  try {
+    const response = await fetch(`${API_BASE}/api/user/${userData.id}`);
+    if (response.ok) {
+      const data = await response.json();
+      if (data.has_subscription) {
+        userData.hasSubscription = true;
+        userData.plan = data.plan;
+        userData.expiresAt = data.expires_at;
+        userData.daysLeft = data.days_left;
+        userData.subscriptionLink = data.subscription_link;
+      }
+    }
+  } catch (e) {
+    console.log('API недоступен');
+  }
+  
+  try {
+    const refResponse = await fetch(`${API_BASE}/api/user/${userData.id}/referrals`);
+    if (refResponse.ok) {
+      const refData = await refResponse.json();
+      referralCount = refData.count || 0;
+      document.getElementById('referral-count').textContent = referralCount;
+      document.getElementById('referral-count-stat').textContent = referralCount;
+    }
+  } catch (e) {}
+  
+  updateUI();
+  loadHistory();
+}
+
+function updateUI() {
+  const subStatus = document.getElementById('sub-status-value');
+  const subPlan = document.getElementById('sub-plan-info');
+  const subExpires = document.getElementById('sub-expires-info');
+  const connectBtn = document.getElementById('connect-btn');
+  
+  if (userData.hasSubscription) {
+    subStatus.textContent = '● Активна';
+    subStatus.className = 'sub-status-value active';
+    subPlan.textContent = userData.plan;
+    subExpires.textContent = `До: ${userData.expiresAt} (осталось ${userData.daysLeft} дн.)`;
+    connectBtn.textContent = 'Скопировать ключ';
+  } else {
+    subStatus.textContent = '● Неактивна';
+    subStatus.className = 'sub-status-value inactive';
+    subPlan.textContent = '—';
+    subExpires.textContent = '—';
+    connectBtn.textContent = 'Подключить VPN';
+  }
+  
+  if (userData.subscriptionLink) {
+    document.getElementById('referral-link').textContent = userData.subscriptionLink;
+  }
+}
+
+async function loadHistory() {
+  const historyDiv = document.getElementById('history-list');
+  if (!historyDiv) return;
+  
+  try {
+    const response = await fetch(`${API_BASE}/api/user/${userData.id}/history`);
+    if (response.ok) {
+      const data = await response.json();
+      if (data.history && data.history.length > 0) {
+        let html = '';
+        for (const p of data.history) {
+          html += `<div class="device-item" style="flex-direction: column; align-items: flex-start;">
+            <div style="display: flex; justify-content: space-between; width: 100%;">
+              <span class="device-name">${p.plan}</span>
+              <span style="color: #2c6e9e;">${p.amount} ₽</span>
+            </div>
+            <div class="device-status">${p.date}</div>
+          </div>`;
+        }
+        historyDiv.innerHTML = html;
+      } else {
+        historyDiv.innerHTML = '<div style="text-align: center; color: #8e8e93; padding: 40px;">Нет платежей</div>';
+      }
+    } else {
+      historyDiv.innerHTML = '<div style="text-align: center; color: #8e8e93; padding: 40px;">Нет платежей</div>';
+    }
+  } catch (e) {
+    historyDiv.innerHTML = '<div style="text-align: center; color: #8e8e93; padding: 40px;">Нет платежей</div>';
+  }
+}
+
+function showPage(pageName, navEl = null) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(`page-${pageName}`).classList.add('active');
+  
+  if (navEl) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    navEl.classList.add('active');
+  }
+  
+  if (pageName === 'referral') {
+    const link = userData.subscriptionLink || `https://t.me/mzmbq_bot?start=ref_${userData.id || 'user'}`;
+    document.getElementById('referral-link').textContent = link;
+  }
+  if (pageName === 'history') {
+    loadHistory();
+  }
+}
+
+// ========== ОПЛАТА (ПРЯМОЙ ВЫЗОВ API) ==========
+async function buyPlan(planId) {
+  const planPrices = { '1m': 100, '3m': 250, '1y': 1000 };
+  
+  if (!userData.id) {
+    showToast('Ошибка: не удалось определить пользователя', false);
+    return;
+  }
+  
+  showToast('Создаём платёж...', false);
+  
+  try {
+    const response = await fetch(`${API_BASE}/api/create_payment`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userData.id, plan_id: planId })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success && data.confirmation_url) {
+      // Открываем ссылку на оплату
+      if (tg) {
+        tg.openInvoice(data.confirmation_url);
+      }
+      window.open(data.confirmation_url, '_blank');
+    } else {
+      showToast('Ошибка создания платежа', false);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    showToast('Ошибка, попробуйте позже', false);
+  }
+}
+
+async function topupAmount(amount) {
+  // Для пополнения баланса — аналогично, но можно использовать тот же эндпоинт с специальным plan_id
+  // Пока просто уведомляем
+  showToast(`Пополнение ${amount} ₽ будет доступно позже`, false);
+}
+
+async function topupCustom() {
+  const amount = document.getElementById('custom-amount')?.value;
+  if (!amount || amount < 100) {
+    showToast('Минимальная сумма 100 ₽', false);
+    return;
+  }
+  showToast(`Пополнение ${amount} ₽ будет доступно позже`, false);
+}
+
+function copyKey() {
+  if (!userData.hasSubscription) {
+    showToast('Сначала приобретите подписку', false);
+    showPage('subscription');
+    return;
+  }
+  if (userData.subscriptionLink && navigator.clipboard) {
+    navigator.clipboard.writeText(userData.subscriptionLink);
+    showToast('✓ Ключ скопирован', true);
+  } else {
+    showToast('Ключ не найден, обратитесь в поддержку', false);
+  }
+}
+
+function copyReferralLink() {
+  const link = document.getElementById('referral-link').textContent;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(link);
+    showToast('✓ Реферальная ссылка скопирована', true);
+  }
+}
+
+function openTg(handle) {
+  if (tg) tg.openTelegramLink('https://t.me/' + handle.replace('@', ''));
+}
+
+function openDocs(type) {
+  if (type === 'offer') {
+    if (tg) tg.openTelegramLink('https://t.me/mzmbq_vpn/1');
+  } else {
+    if (tg) tg.openTelegramLink('https://t.me/mzmbq_vpn/2');
+  }
+}
+
+function showToast(msg, success = false) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'toast' + (success ? ' success' : '');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+loadUserData();
+</script>
+</body>
+</html>
